@@ -34,7 +34,6 @@ class BigNumber extends Emitter {
   prepareLink() {
     const url = new URL('https://twitter.com/search');
     
-    
     if (this.component.dataset.query.match(/^context/)) {
       const entityId = this.component.dataset.query.replace('context:', '');
       url.searchParams.append('q', `(* [entity_id ${entityId}])`);
@@ -43,7 +42,10 @@ class BigNumber extends Emitter {
     }
 
     this.link.href = url;
-
+  }
+  
+  didUpdateDataset() {
+    this.setState({volumeLabel: this.component.dataset.volume});
   }
     
   render() {
@@ -69,7 +71,12 @@ class BigNumber extends Emitter {
       
       this.chart.dataset.data = JSON.stringify(this.state.results);
       this.chart.dataset.volume = this.state.totalCount;
+      this.chart.parent = this;
       this.number.innerText = new Intl.NumberFormat().format(this.state.totalCount);
+    }
+    
+    if (this.state.volumeLabel) {
+      this.number.innerText = this.state.volumeLabel;
     }
     
   }

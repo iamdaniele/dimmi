@@ -1,6 +1,7 @@
 class Chart extends Emitter {
   constructor(element) {
     super(element);
+    this.previouslySelected = null;
   }
     
   willRender() {
@@ -16,7 +17,25 @@ class Chart extends Emitter {
     } catch (e) {
       return false;
     }
+  }
+  
+  showDetail(e) {
+    if (!e.target.classList.contains('histogram')) {
+      return;
+    }
     
+    if (e.target.classList.contains('selected')) {
+      e.target.classList.remove('selected');
+      this.previouslySelected = null;
+      const numberFormatter = new Intl.NumberFormat();
+      this.component.parent.component.dataset.volume = numberFormatter.format(this.volume);
+      return;
+    }
+    
+    this.previouslySelected?.classList.remove('selected');
+    e.target.classList.add('selected');
+    this.component.parent.component.dataset.volume = e.target.dataset.title;
+    this.previouslySelected = e.target;
   }
   
   determineTrend() {   
@@ -29,19 +48,31 @@ class Chart extends Emitter {
     return (length * sumOfMultipliedValues - sumOfLength * sumOfValues) / (length * sumOfSquares - Math.sqrt(sumOfLength));
   }
   
+  didUpdateDataset(data) {
+    try {
+      this.data = JSON.parse(this.component.dataset.data);
+      this.setState({ data: this.data });
+    } catch (e) {}
+  }
+  
   render() {
-    const dateFormatter = new Intl.DateTimeFormat();
+    const dateFormatter = new Intl.DateTimeFormat('default', {month: 'short', day: 'numeric'});
     const numberFormatter = new Intl.NumberFormat();
     this.component.innerHTML = '';
     const max = Math.max(...this.dataCounts);
     this.dataCounts.map((count, i) => {
       const histogram = document.createElement('div');
+      histogram.classList.add('histogram');
       const height = (count / max) * 100;
-      histogram.style.height = height === 0 ? '1px' : height.toFixed(2) + '%';
+      histogram.style.height = height === 0 ? '100%' : height.toFixed(2) + '%';
+      if (height === 0) {
+        histogram.classList.add('zero');
+      }
       let dateParts = this.data[i].timePeriod.match(/(\d{4})(\d{2})(\d{2})/).splice(1,3);
+      dateParts[1] -= 1;
       dateParts = dateParts.concat([0, 0, 0, 0]);
       const date = new Date(Date.UTC(...dateParts));
-      histogram.title = `${dateFormatter.format(date)}: ${numberFormatter.format(count)}`;
+      histogram.dataset.title = `${dateFormatter.format(date)}: ${numberFormatter.format(count)}`;
       this.component.appendChild(histogram);
     });
     

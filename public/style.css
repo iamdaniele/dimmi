@@ -151,6 +151,21 @@ div.chart-container.up > div {
   background-color: #43AA8B;
 }
 
+div.chart-container.down > div.zero {
+  background-color: #000;
+  border-bottom: 2px solid #F94144;
+  border-radius: 0;
+
+}
+
+div.chart-container.up > div.zero {
+  background-color: #000;
+  border-bottom: 2px solid #43AA8B;
+  border-radius: 0;
+}
+
+
+
 div.bignumber {
   max-width: 530px;
   margin: 20px auto;
@@ -177,8 +192,11 @@ div.bignumber .error {
 iframe {border-radius: 16px}
 
 section[e\:class="TrendsContainer"] div.error {
-  display: none;
   text-align: center;
+}
+
+div.histogram.selected {
+  opacity: 0.5;
 }
 
 @media (prefers-color-scheme: dark) {

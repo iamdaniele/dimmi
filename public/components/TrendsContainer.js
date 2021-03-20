@@ -19,10 +19,10 @@ class TrendsContainer extends Emitter {
       tweetId: tweet.data.id,
     });
 
-    return this.dispatchTrends(tweet);
+    return this.prepareQueries(tweet);
   }
-  
-  dispatchTrends(tweet) {
+   
+  prepareQueries(tweet) {
     const entities = [];
     
     if (!tweet.data.context_annotations) {
@@ -47,20 +47,16 @@ class TrendsContainer extends Emitter {
       .concat(tweet.data.entities && tweet.data.entities.mentions ? tweet.data.entities.mentions.map(mention => {
         return { query: `@${mention.username}`, name: `@${mention.username}`, search: `@${mention.username}` };
       }) : []);
-    
-    // this.props.tweet.countsQuery.map(query => Emitter.dispatch(fetch(`/counts?q=${query.search}`)));
-    
-    if (this.countsQuery.length) {
-      this.setState({hasQueries: true});
-    }    
+       
+    this.setState({queriesDidPrepare: true});
   }
   
-  render() {
-    if (!this.state.hasQueries) {
+  render() {   
+    if (this.state.queriesDidPrepare && this.countsQuery.length === 0) {
       this.error.hidden = false;
       return;
     }
-    
+        
     this.countsQuery.map(query => {
       const bigNumber = Emitter.template.BigNumber;
       bigNumber.dataset.name = query.name;
